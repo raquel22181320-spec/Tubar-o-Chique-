@@ -32,20 +32,8 @@ color:white;
 
 header h1{
 font-size:35px;
-}
-
-.admin-btn{
-position:fixed;
-top:15px;
-right:15px;
-background:black;
-color:white;
-border:none;
-padding:12px 18px;
-border-radius:10px;
-font-weight:bold;
 cursor:pointer;
-z-index:999;
+user-select:none;
 }
 
 .admin{
@@ -214,18 +202,17 @@ cursor:pointer;
 
 <header>
 
-<h1>🦈 Tubarão Chique</h1>
+<h1
+id="logoAdmin"
+onclick="abrirAdminSecreto()">
+
+🦈 Tubarão Chique
+
+</h1>
 
 <p>As melhores ofertas da internet</p>
 
 </header>
-
-<button class="admin-btn"
-onclick="loginAdmin()">
-
-ADMIN
-
-</button>
 
 <section class="admin"
 id="painelAdmin">
@@ -301,6 +288,41 @@ let editando = null;
 
 let adminLogado = false;
 
+let senhaSalva =
+localStorage.getItem("admin");
+
+if(senhaSalva === "logado"){
+
+adminLogado = true;
+
+document
+.getElementById("painelAdmin")
+.style.display = "block";
+
+}
+
+let cliquesLogo = 0;
+
+function abrirAdminSecreto(){
+
+cliquesLogo++;
+
+if(cliquesLogo >= 5){
+
+loginAdmin();
+
+cliquesLogo = 0;
+
+}
+
+setTimeout(() => {
+
+cliquesLogo = 0;
+
+}, 3000);
+
+}
+
 function loginAdmin(){
 
 let senha =
@@ -309,6 +331,11 @@ prompt("Digite a senha admin");
 if(senha === senhaAdmin){
 
 adminLogado = true;
+
+localStorage.setItem(
+"admin",
+"logado"
+);
 
 document
 .getElementById("painelAdmin")
@@ -506,6 +533,8 @@ editando = null;
 
 }
 
+salvarProdutos();
+
 limparCampos();
 
 }
@@ -606,6 +635,8 @@ botao
 .parentElement
 .remove();
 
+salvarProdutos();
+
 }
 
 }
@@ -651,6 +682,31 @@ document.getElementById("img4").value = "";
 document.getElementById("img5").value = "";
 
 }
+
+function salvarProdutos(){
+
+localStorage.setItem(
+"produtos",
+document.getElementById("produtos").innerHTML
+);
+
+}
+
+function carregarProdutos(){
+
+let produtos =
+localStorage.getItem("produtos");
+
+if(produtos){
+
+document.getElementById("produtos").innerHTML =
+produtos;
+
+}
+
+}
+
+carregarProdutos();
 
 </script>
 
