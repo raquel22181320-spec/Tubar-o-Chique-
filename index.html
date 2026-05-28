@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Tubarão Chique</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:#f5f5f5;
+}
+
+header{
+background:linear-gradient(90deg,#ff6600,#ff9900);
+padding:20px;
+text-align:center;
+color:white;
+}
+
+header h1{
+font-size:35px;
+}
+
+.admin-btn{
+position:fixed;
+top:15px;
+right:15px;
+background:black;
+color:white;
+border:none;
+padding:12px 18px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+z-index:999;
+}
+
+.admin{
+display:none;
+background:white;
+padding:20px;
+margin:20px;
+border-radius:15px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.admin h2{
+margin-bottom:15px;
+}
+
+.admin input,
+.admin textarea{
+width:100%;
+padding:14px;
+margin-bottom:10px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+.admin textarea{
+height:120px;
+resize:none;
+}
+
+.admin button{
+width:100%;
+padding:14px;
+background:#ff6600;
+color:white;
+border:none;
+border-radius:10px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+margin-bottom:10px;
+}
+
+.produtos{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+padding:20px;
+}
+
+.produto{
+background:white;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.galeria{
+display:flex;
+gap:10px;
+overflow-x:auto;
+margin-bottom:10px;
+}
+
+.galeria img{
+width:120px;
+height:120px;
+object-fit:cover;
+border-radius:10px;
+flex-shrink:0;
+cursor:pointer;
+}
+
+.produto h2{
+font-size:20px;
+margin-bottom:10px;
+}
+
+.descricao{
+font-size:15px;
+color:#444;
+margin-bottom:10px;
+line-height:1.5;
+}
+
+.preco{
+font-size:24px;
+font-weight:bold;
+color:#ff6600;
+margin-bottom:10px;
+}
+
+.botao{
+display:block;
+background:#ff6600;
+color:white;
+padding:12px;
+text-align:center;
+text-decoration:none;
+border-radius:10px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.acoes{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.editar{
+flex:1;
+background:#2196f3;
+color:white;
+border:none;
+padding:10px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.remover{
+flex:1;
+background:#f44336;
+color:white;
+border:none;
+padding:10px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+justify-content:center;
+align-items:center;
+z-index:9999;
+}
+
+.modal img{
+max-width:90%;
+max-height:90%;
+border-radius:15px;
+}
+
+.fechar{
+position:absolute;
+top:20px;
+right:20px;
+font-size:40px;
+color:white;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>🦈 Tubarão Chique</h1>
+
+<p>As melhores ofertas da internet</p>
+
+</header>
+
+<button class="admin-btn"
+onclick="loginAdmin()">
+
+ADMIN
+
+</button>
+
+<section class="admin"
+id="painelAdmin">
+
+<h2>Adicionar Produto</h2>
+
+<input
+type="text"
+id="nome"
+placeholder="Nome do produto">
+
+<input
+type="text"
+id="preco"
+placeholder="Preço">
+
+<textarea
+id="descricao"
+placeholder="Descrição do produto"></textarea>
+
+<input
+type="text"
+id="link"
+placeholder="Link afiliado Shopee">
+
+<label>Imagem 1</label>
+<input type="file" id="img1" accept="image/*">
+
+<label>Imagem 2</label>
+<input type="file" id="img2" accept="image/*">
+
+<label>Imagem 3</label>
+<input type="file" id="img3" accept="image/*">
+
+<label>Imagem 4</label>
+<input type="file" id="img4" accept="image/*">
+
+<label>Imagem 5</label>
+<input type="file" id="img5" accept="image/*">
+
+<button onclick="adicionarProduto()">
+
+Adicionar Produto
+
+</button>
+
+</section>
+
+<section class="produtos"
+id="produtos">
+
+</section>
+
+<div class="modal"
+id="modalImagem">
+
+<span class="fechar"
+onclick="fecharImagem()">
+
+×
+
+</span>
+
+<img id="imagemGrande">
+
+</div>
+
+<script>
+
+const senhaAdmin = "Raquel30";
+
+let editando = null;
+
+let adminLogado = false;
+
+function loginAdmin(){
+
+let senha =
+prompt("Digite a senha admin");
+
+if(senha === senhaAdmin){
+
+adminLogado = true;
+
+document
+.getElementById("painelAdmin")
+.style.display = "block";
+
+atualizarBotoesAdmin();
+
+}else{
+
+alert("Senha incorreta");
+
+}
+
+}
+
+function adicionarProduto(){
+
+let nome =
+document.getElementById("nome").value;
+
+let preco =
+document.getElementById("preco").value;
+
+let descricao =
+document.getElementById("descricao").value;
+
+let link =
+document.getElementById("link").value;
+
+let img1 =
+document.getElementById("img1").files[0];
+
+let img2 =
+document.getElementById("img2").files[0];
+
+let img3 =
+document.getElementById("img3").files[0];
+
+let img4 =
+document.getElementById("img4").files[0];
+
+let img5 =
+document.getElementById("img5").files[0];
+
+if(
+nome == "" ||
+preco == "" ||
+descricao == "" ||
+link == ""
+){
+
+alert("Preencha tudo");
+
+return;
+
+}
+
+let galeria = "";
+
+if(img1){
+
+galeria += `
+<img
+src="${URL.createObjectURL(img1)}"
+onclick="abrirImagem(this.src)">
+`;
+
+}
+
+if(img2){
+
+galeria += `
+<img
+src="${URL.createObjectURL(img2)}"
+onclick="abrirImagem(this.src)">
+`;
+
+}
+
+if(img3){
+
+galeria += `
+<img
+src="${URL.createObjectURL(img3)}"
+onclick="abrirImagem(this.src)">
+`;
+
+}
+
+if(img4){
+
+galeria += `
+<img
+src="${URL.createObjectURL(img4)}"
+onclick="abrirImagem(this.src)">
+`;
+
+}
+
+if(img5){
+
+galeria += `
+<img
+src="${URL.createObjectURL(img5)}"
+onclick="abrirImagem(this.src)">
+`;
+
+}
+
+if(galeria == ""){
+
+alert("Adicione pelo menos 1 imagem");
+
+return;
+
+}
+
+let produtoHTML = `
+
+<div class="galeria">
+
+${galeria}
+
+</div>
+
+<h2>
+
+${nome}
+
+</h2>
+
+<p class="descricao">
+
+${descricao}
+
+</p>
+
+<div class="preco">
+
+R$ ${preco}
+
+</div>
+
+<a class="botao"
+href="${link}"
+target="_blank">
+
+Comprar Agora
+
+</a>
+
+${adminLogado ? `
+
+<div class="acoes">
+
+<button class="editar"
+onclick="editarProduto(this)">
+
+Editar
+
+</button>
+
+<button class="remover"
+onclick="removerProduto(this)">
+
+Remover
+
+</button>
+
+</div>
+
+` : ""}
+
+`;
+
+if(editando == null){
+
+let div =
+document.createElement("div");
+
+div.className = "produto";
+
+div.innerHTML = produtoHTML;
+
+document
+.getElementById("produtos")
+.appendChild(div);
+
+}else{
+
+editando.innerHTML =
+produtoHTML;
+
+editando = null;
+
+}
+
+limparCampos();
+
+}
+
+function atualizarBotoesAdmin(){
+
+let produtos =
+document.querySelectorAll(".produto");
+
+produtos.forEach(function(produto){
+
+if(
+!produto.querySelector(".acoes")
+){
+
+produto.innerHTML += `
+
+<div class="acoes">
+
+<button class="editar"
+onclick="editarProduto(this)">
+
+Editar
+
+</button>
+
+<button class="remover"
+onclick="removerProduto(this)">
+
+Remover
+
+</button>
+
+</div>
+
+`;
+
+}
+
+});
+
+}
+
+function editarProduto(botao){
+
+let produto =
+botao.parentElement.parentElement;
+
+let nome =
+produto.querySelector("h2").innerText;
+
+let descricao =
+produto.querySelector(".descricao").innerText;
+
+let preco =
+produto
+.querySelector(".preco")
+.innerText
+.replace("R$ ","");
+
+let link =
+produto.querySelector("a").href;
+
+document
+.getElementById("nome")
+.value = nome;
+
+document
+.getElementById("descricao")
+.value = descricao;
+
+document
+.getElementById("preco")
+.value = preco;
+
+document
+.getElementById("link")
+.value = link;
+
+editando = produto;
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+function removerProduto(botao){
+
+let confirmar =
+confirm("Deseja remover este produto?");
+
+if(confirmar){
+
+botao
+.parentElement
+.parentElement
+.remove();
+
+}
+
+}
+
+function abrirImagem(src){
+
+document
+.getElementById("modalImagem")
+.style.display = "flex";
+
+document
+.getElementById("imagemGrande")
+.src = src;
+
+}
+
+function fecharImagem(){
+
+document
+.getElementById("modalImagem")
+.style.display = "none";
+
+}
+
+function limparCampos(){
+
+document.getElementById("nome").value = "";
+
+document.getElementById("preco").value = "";
+
+document.getElementById("descricao").value = "";
+
+document.getElementById("link").value = "";
+
+document.getElementById("img1").value = "";
+
+document.getElementById("img2").value = "";
+
+document.getElementById("img3").value = "";
+
+document.getElementById("img4").value = "";
+
+document.getElementById("img5").value = "";
+
+}
+
+</script>
+
+</body>
+
+</html>
